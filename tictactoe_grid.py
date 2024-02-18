@@ -8,6 +8,7 @@ class TictactoeGrid:
 
 
 	def winning_check(self):
+		# DRY : don't repeat yourself
 		there_is_winner = (numpy.all(self.grid[0,:] == self.grid[0, 0]) and self.grid[0, 0] != 0 ) or\
 						  		(numpy.all(self.grid[1,:] == self.grid[1, 0]) and self.grid[1, 0] != 0 ) or\
 						  		(numpy.all(self.grid[2,:] == self.grid[2, 0]) and self.grid[2, 0] != 0 ) or\
@@ -59,7 +60,7 @@ class TictactoeGrid:
 			for index_column in range(0, 3):
 				if self.grid[index_line, index_column] == 0:
 					self.grid[index_line, index_column] = 2
-					score = self.minmax(is_maximizing=True)
+					score = self.minmax(robot_turn=False)
 					if score > best_score:
 						best_score = score
 						best_index_line = index_line
@@ -69,22 +70,22 @@ class TictactoeGrid:
 		return best_index_line, best_index_column
 
 
-	def minmax(self, is_maximizing):
+	def minmax(self, robot_turn):
 		
 		if self.winning_check():
-			return 1 if is_maximizing else -1 
+			return -1 if robot_turn else 1 
 		elif not self.get_game_state():
 			return 0
 		
-		else :
-			best_score = -float('inf') if is_maximizing else float('inf')
 
-			for index_line in range(0, 3):
-				for index_column in range(0, 3):
-					if self.grid[index_line, index_column] == 0:
-						self.grid[index_line, index_column] = 1 if is_maximizing else 2
-						score = self.minmax(not is_maximizing)
-						self.grid[index_line, index_column] = 0
-						best_score = max(score, best_score) if is_maximizing else min(score, best_score)
-						
-			return best_score
+		best_score = -float('inf') if robot_turn else float('inf')
+
+		for index_line in range(0, 3):
+			for index_column in range(0, 3):
+				if self.grid[index_line, index_column] == 0:
+					self.grid[index_line, index_column] = 2 if robot_turn else 1
+					score = self.minmax(not robot_turn)
+					self.grid[index_line, index_column] = 0
+					best_score = max(score, best_score) if robot_turn else min(score, best_score)
+					
+		return best_score
